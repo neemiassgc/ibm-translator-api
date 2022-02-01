@@ -27,4 +27,14 @@ public class TranslateMapper {
                 )
             ).collect(Collectors.toList());
     }
+
+    public TranslateResponseOutput mapTranslateResponse(final TranslateRequestInput translateRequestInput) {
+        final TranslationResult translationResult = translateService.translate(
+            translateRequestInput.getText(),
+            translateRequestInput.getSourceLanguage(),
+            translateRequestInput.getTargetLanguage()
+        );
+
+        return new TranslateResponseOutput(translationResult.getTranslations().get(0).getTranslation());
+    }
 }
