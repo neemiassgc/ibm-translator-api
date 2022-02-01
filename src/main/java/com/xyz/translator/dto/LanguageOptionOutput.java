@@ -1,4 +1,4 @@
-package com.xyz.translator.output;
+package com.xyz.translator.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class LanguageOutput {
+public class LanguageOptionOutput {
 
     private final String languageName;
     private final String nativeLanguageName;
