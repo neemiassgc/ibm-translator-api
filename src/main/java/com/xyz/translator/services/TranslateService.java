@@ -1,44 +1,34 @@
 package com.xyz.translator.services;
 
 import com.ibm.watson.language_translator.v3.LanguageTranslator;
+import com.ibm.watson.language_translator.v3.model.Language;
 import com.ibm.watson.language_translator.v3.model.TranslateOptions;
-import com.xyz.translator.composers.SingletonLanguageTranslator;
-import com.xyz.translator.model.TranslateModel;
-import com.xyz.translator.output.LanguageOutput;
+import com.ibm.watson.language_translator.v3.model.TranslationResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
-public class TranslateService implements TranslateModel {
+public class TranslateService{
 
-    private static final LanguageTranslator languageTranslator = SingletonLanguageTranslator.getInstance();
+    @Autowired
+    private LanguageTranslator languageTranslator;
 
-    @Override
-    public List<LanguageOutput> listLanguages() {
-        return languageTranslator.listLanguages().execute().getResult().getLanguages()
-            .stream()
-                .filter(language -> language.isSupportedAsSource() && language.isSupportedAsTarget())
-                .map(language -> new LanguageOutput(language.getLanguageName(),
-                    language.getNativeLanguageName(),
-                    language.getLanguage())).collect(Collectors.toList());
+    public List<Language> listLanguages() {
+        return languageTranslator.listLanguages().execute().getResult().getLanguages();
     }
 
-    @Override
-    public String translate(final String text, final String sourceLanguage, final String targetLanguage) {
+    public TranslationResult translate(final String text, final String from, final String to) {
         TranslateOptions translateOptions = new TranslateOptions.Builder()
             .addText(text)
-            .source(sourceLanguage)
-            .target(targetLanguage)
+            .source(from)
+            .target(to)
             .build();
 
         return languageTranslator
             .translate(translateOptions)
             .execute()
-            .getResult()
-            .getTranslations()
-            .get(0)
-            .getTranslation();
+            .getResult();
     }
 }
