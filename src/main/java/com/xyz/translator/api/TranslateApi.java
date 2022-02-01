@@ -1,41 +1,41 @@
 package com.xyz.translator.api;
 
-import com.xyz.translator.model.TranslateModel;
-import com.xyz.translator.output.LanguageOutput;
+import com.xyz.translator.dto.LanguageOptionOutput;
+import com.xyz.translator.dto.TranslateRequestInput;
+import com.xyz.translator.dto.TranslateResponseOutput;
+import com.xyz.translator.services.TranslateMapper;
+import com.xyz.translator.services.TranslateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin("*")
 @Controller
 public class TranslateApi {
 
     @Autowired
-    private TranslateModel translateModel;
+    private TranslateService translateService;
+
+    @Autowired
+    private TranslateMapper translateMapper;
 
     @GetMapping(path = "/languages", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<List<LanguageOutput>> getLanguageOptions() {
-        return ResponseEntity.ok(translateModel.listLanguages());
+    public ResponseEntity<List<LanguageOptionOutput>> getLanguageOptions() {
+        return ResponseEntity.ok(translateMapper.mapLanguages(translateService.listLanguages()));
     }
 
-    @GetMapping(
+    @PostMapping(
         path = "/translate",
-        params = {"source", "target"},
-        produces = MediaType.TEXT_PLAIN_VALUE
+        produces = MediaType.APPLICATION_JSON_VALUE,
+        consumes = MediaType.APPLICATION_JSON_VALUE
     )
     @ResponseBody
-    public String translate(
-        @RequestParam(value = "source", defaultValue = "en") final String source,
-        @RequestParam(value = "target", defaultValue = "pt") final String target,
-        @RequestBody final String text
-    ) {
-        return translateModel.translate(text, source, target);
+    public TranslateResponseOutput translate(@RequestBody final TranslateRequestInput translateRequestInput) {
+        return translateMapper.mapTranslateResponse(translateRequestInput);
     }
 }
