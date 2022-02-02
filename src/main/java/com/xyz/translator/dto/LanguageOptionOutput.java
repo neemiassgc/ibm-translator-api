@@ -1,15 +1,17 @@
 package com.xyz.translator.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class LanguageOptionOutput {
 
-    private final String languageName;
-    private final String nativeLanguageName;
-    private final String language;
+    private String languageName;
+    private String nativeLanguageName;
+    private String language;
 }
