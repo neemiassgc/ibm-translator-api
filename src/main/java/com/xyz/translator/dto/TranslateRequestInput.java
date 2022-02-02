@@ -4,10 +4,11 @@ import lombok.*;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public final class TranslateRequestInput {
 
-    private final String text;
-    private final String sourceLanguage;
-    private final String targetLanguage;
+    private String text;
+    private String sourceLanguage;
+    private String targetLanguage;
 }
