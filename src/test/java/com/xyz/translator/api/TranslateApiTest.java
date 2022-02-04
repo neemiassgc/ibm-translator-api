@@ -9,6 +9,7 @@ import com.xyz.translator.services.TranslateService;
 import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.BDDMockito.*;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -48,5 +49,25 @@ final class TranslateApiTest {
 
         verify(translateServiceMock, times(1)).listLanguages();
         verify(translateMapperMock, times(1)).mapLanguages(anyList());
+    }
+
+    @Test
+    void translateTest() {
+        // given
+        final TranslateRequestInput translateRequestInput = new TranslateRequestInput();
+        final TranslateResponseOutput translateResponseOutput = new TranslateResponseOutput();
+        given(translateMapperMock.mapTranslateResponse(any(TranslateRequestInput.class)))
+            .willReturn(translateResponseOutput);
+
+        // when
+        final TranslateResponseOutput actualResult = translateApi.translate(translateRequestInput);
+
+        // then
+        assertThat(actualResult).isNotNull();
+
+        verify(translateMapperMock, times(1))
+            .mapTranslateResponse(any(TranslateRequestInput.class));
+        verify(translateMapperMock, only())
+                .mapTranslateResponse(any(TranslateRequestInput.class));
     }
 }
