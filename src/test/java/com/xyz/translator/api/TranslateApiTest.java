@@ -1,15 +1,21 @@
 package com.xyz.translator.api;
 
+import com.ibm.cloud.sdk.core.service.exception.ServiceResponseException;
 import com.ibm.watson.language_translator.v3.model.Language;
 import com.xyz.translator.dto.LanguageOptionOutput;
 import com.xyz.translator.dto.TranslateRequestInput;
 import com.xyz.translator.dto.TranslateResponseOutput;
+import com.xyz.translator.error.ErrorResponse;
 import com.xyz.translator.services.TranslateMapper;
 import com.xyz.translator.services.TranslateService;
 import static org.assertj.core.api.Assertions.*;
+
+import okhttp3.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.BDDMockito.*;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -69,5 +75,28 @@ final class TranslateApiTest {
             .mapTranslateResponse(any(TranslateRequestInput.class));
         verify(translateMapperMock, only())
                 .mapTranslateResponse(any(TranslateRequestInput.class));
+    }
+
+    @Test
+    void handleExceptionTest() {
+        // given
+        final Response response = new Response.Builder()
+            .request(new Request.Builder().get().url("https://google.com").build())
+            .protocol(Protocol.HTTP_1_1)
+            .body(ResponseBody.create(MediaType.get("application/json"), "{'name':'Bob'}"))
+            .code(0)
+            .message("default")
+            .sentRequestAtMillis(200)
+            .receivedResponseAtMillis(500).build();
+
+        final ServiceResponseException serviceResponseException = new ServiceResponseException(200, response);
+
+        // when
+        final ResponseEntity<ErrorResponse> actualResponse = translateApi.handleException(serviceResponseException);
+
+        // then
+        assertThat(actualResponse).isNotNull();
+        assertThat(actualResponse.getBody()).isNotNull();
+        assertThat(actualResponse.getStatusCodeValue()).isEqualTo(200);
     }
 }
