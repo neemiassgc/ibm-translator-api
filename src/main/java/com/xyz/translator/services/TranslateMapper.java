@@ -5,6 +5,7 @@ import com.ibm.watson.language_translator.v3.model.TranslationResult;
 import com.xyz.translator.dto.LanguageOptionOutput;
 import com.xyz.translator.dto.TranslateRequestInput;
 import com.xyz.translator.dto.TranslateResponseOutput;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,10 +13,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class TranslateMapper {
 
-    @Autowired
-    private TranslateService translateService;
+    private final TranslateService translateService;
 
     public List<LanguageOptionOutput> mapLanguages(List<Language> languages) {
         return languages
