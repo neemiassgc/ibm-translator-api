@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("ConstantConditions")
 final class TranslateMapperTest {
 
     private TranslateService translateServiceMock;
@@ -114,5 +115,11 @@ final class TranslateMapperTest {
             .translate(any(String.class), any(String.class), any(String.class));
         verify(this.translateServiceMock, only())
             .translate(any(String.class), any(String.class), any(String.class));
+    }
+
+    @Test
+    void mapTranslateResponseTestWithNullInputShouldThrowAnException() {
+        assertThatNullPointerException()
+            .isThrownBy(() -> this.translateMapperUnderTest.mapTranslateResponse(null));
     }
 }
