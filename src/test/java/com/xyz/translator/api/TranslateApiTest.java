@@ -8,19 +8,15 @@ import com.xyz.translator.dto.TranslateResponseOutput;
 import com.xyz.translator.error.ErrorResponse;
 import com.xyz.translator.services.TranslateMapper;
 import com.xyz.translator.services.TranslateService;
-import static org.assertj.core.api.Assertions.*;
-
 import okhttp3.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.BDDMockito.*;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.*;
 
 final class TranslateApiTest {
 
