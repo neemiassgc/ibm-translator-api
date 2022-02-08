@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -83,6 +83,12 @@ final class TranslateMapperTest {
         // then
         assertThat(actualList).isNotNull();
         assertThat(actualList).isEmpty();
+    }
+
+    @Test
+    void mapLanguagesWithNullListShouldThrowAnException() {
+        assertThatNullPointerException()
+            .isThrownBy(() -> this.translateMapperUnderTest.mapTranslateResponse(null));
     }
 
     @Test
