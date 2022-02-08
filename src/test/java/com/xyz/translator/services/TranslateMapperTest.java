@@ -10,10 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -70,6 +70,19 @@ final class TranslateMapperTest {
         assertThat(actualList).isNotNull();
         assertThat(actualList).allSatisfy(lang -> assertThat(lang).isNotNull());
         assertThat(actualList).hasSize(4);
+    }
+
+    @Test
+    void mapLanguagesWithEmptyList() {
+        // given
+        final List<Language> emptyList = Collections.emptyList();
+
+        // when
+        final List<LanguageOptionOutput> actualList = this.translateMapperUnderTest.mapLanguages(emptyList);
+
+        // then
+        assertThat(actualList).isNotNull();
+        assertThat(actualList).isEmpty();
     }
 
     @Test
