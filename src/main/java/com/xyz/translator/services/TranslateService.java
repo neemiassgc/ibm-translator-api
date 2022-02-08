@@ -4,16 +4,17 @@ import com.ibm.watson.language_translator.v3.LanguageTranslator;
 import com.ibm.watson.language_translator.v3.model.Language;
 import com.ibm.watson.language_translator.v3.model.TranslateOptions;
 import com.ibm.watson.language_translator.v3.model.TranslationResult;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class TranslateService{
 
-    @Autowired
-    private LanguageTranslator languageTranslator;
+    private final LanguageTranslator languageTranslator;
 
     public List<Language> listLanguages() {
         return languageTranslator.listLanguages().execute().getResult().getLanguages();
