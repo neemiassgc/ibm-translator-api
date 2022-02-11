@@ -19,11 +19,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -151,5 +153,26 @@ public class TranslateApiMvcTest {
             .andExpect(status().isBadRequest())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.message").value("Unable to validate payload size, the 'text' is empty."));
+    }
+
+    @Test
+    void shouldReturn400WhenTranslatingWithoutText() throws Exception {
+        final TranslateRequestInput input = new TranslateRequestInput(null, "en", "fr");
+        final String message = "text cannot be null";
+
+        given(this.translateMapperMock.mapTranslateResponse(any(TranslateRequestInput.class)))
+            .willThrow(new IllegalArgumentException(message));
+
+        final MvcResult mvcResult = mockMvc.perform(post("/translate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(input))
+        )
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$").exists())
+            .andExpect(jsonPath("$.message").value(message))
+            .andExpect(jsonPath("$").isMap()).andReturn();
+
+        assertThat(mvcResult.getResolvedException()).isInstanceOf(IllegalArgumentException.class);
     }
 }
