@@ -108,4 +108,30 @@ public class TranslateApiMvcTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.message").value("The parameter 'target' should not be empty"));
     }
+
+    @Test
+    void shouldReturn400WhenTranslatingWithEmptyTargetLanguage() throws Exception {
+        final TranslateRequestInput input = new TranslateRequestInput("Hello", "en", "");
+        final Response httpResponse = new Response.Builder()
+            .code(400)
+            .body(ResponseBody.create(
+                okhttp3.MediaType.parse("application/json"),
+                "The parameter 'target' should not be empty")
+            )
+            .message("")
+            .protocol(Protocol.HTTP_1_1)
+            .request(new okhttp3.Request.Builder().url("http://localhost/translate").build())
+            .build();
+
+        given(this.translateMapperMock.mapTranslateResponse(any(TranslateRequestInput.class)))
+            .willThrow(new BadRequestException(httpResponse));
+
+        mockMvc.perform(post("/translate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(input))
+        )
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.message").value("The parameter 'target' should not be empty"));
+    }
 }
