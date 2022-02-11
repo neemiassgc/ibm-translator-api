@@ -8,9 +8,12 @@ import com.xyz.translator.dto.TranslateResponseOutput;
 import com.xyz.translator.services.TranslateMapper;
 import com.xyz.translator.services.TranslateService;
 import okhttp3.Protocol;
+import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,6 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class TranslateApiMvcTest {
 
     @Autowired
@@ -43,6 +48,20 @@ public class TranslateApiMvcTest {
 
     @MockBean
     private TranslateMapper translateMapperMock;
+
+    private Function<String, Response> httpResponse;
+
+    @BeforeAll
+    void init() {
+        this.httpResponse = (body) ->
+            new Response.Builder()
+                .code(400)
+                .body(ResponseBody.create(okhttp3.MediaType.parse("application/json"), body))
+                .message("")
+                .protocol(Protocol.HTTP_1_1)
+                .request(new Request.Builder().url("http://localhost/translate").build())
+                .build();
+    }
 
     @Test
     void shouldReturnLanguageOptions() throws Exception {
@@ -86,16 +105,7 @@ public class TranslateApiMvcTest {
     @Test
     void shouldReturn400WhenTranslatingWithNullTargetLanguage() throws Exception {
         final TranslateRequestInput input = new TranslateRequestInput("Hello", "en", null);
-        final Response httpResponse = new Response.Builder()
-            .code(400)
-            .body(ResponseBody.create(
-                okhttp3.MediaType.parse("application/json"),
-                "The parameter 'target' should not be empty")
-            )
-            .message("")
-            .protocol(Protocol.HTTP_1_1)
-            .request(new okhttp3.Request.Builder().url("http://localhost/translate").build())
-            .build();
+        final Response httpResponse = this.httpResponse.apply("The parameter 'target' should not be empty");
 
         given(this.translateMapperMock.mapTranslateResponse(any(TranslateRequestInput.class)))
             .willThrow(new BadRequestException(httpResponse));
@@ -112,16 +122,7 @@ public class TranslateApiMvcTest {
     @Test
     void shouldReturn400WhenTranslatingWithEmptyTargetLanguage() throws Exception {
         final TranslateRequestInput input = new TranslateRequestInput("Hello", "en", "");
-        final Response httpResponse = new Response.Builder()
-            .code(400)
-            .body(ResponseBody.create(
-                okhttp3.MediaType.parse("application/json"),
-                "The parameter 'target' should not be empty")
-            )
-            .message("")
-            .protocol(Protocol.HTTP_1_1)
-            .request(new okhttp3.Request.Builder().url("http://localhost/translate").build())
-            .build();
+        final Response httpResponse = this.httpResponse.apply("The parameter 'target' should not be empty");
 
         given(this.translateMapperMock.mapTranslateResponse(any(TranslateRequestInput.class)))
             .willThrow(new BadRequestException(httpResponse));
@@ -138,16 +139,7 @@ public class TranslateApiMvcTest {
     @Test
     void shouldReturn400WhenTranslatingWithEmptyText() throws Exception {
         final TranslateRequestInput input = new TranslateRequestInput("", "en", "fr");
-        final Response httpResponse = new Response.Builder()
-            .code(400)
-            .body(ResponseBody.create(
-                okhttp3.MediaType.parse("application/json"),
-                "Unable to validate payload size, the 'text' is empty.")
-            )
-            .message("")
-            .protocol(Protocol.HTTP_1_1)
-            .request(new okhttp3.Request.Builder().url("http://localhost/translate").build())
-            .build();
+        final Response httpResponse = this.httpResponse.apply("Unable to validate payload size, the 'text' is empty.");
 
         given(this.translateMapperMock.mapTranslateResponse(any(TranslateRequestInput.class)))
             .willThrow(new BadRequestException(httpResponse));
