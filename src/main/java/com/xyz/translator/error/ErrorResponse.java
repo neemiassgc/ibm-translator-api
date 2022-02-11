@@ -16,7 +16,7 @@ public final class ErrorResponse {
         this(sre.getMessage(), sre.getCause(), sre.getStatusCode());
     }
 
-    private ErrorResponse(String message, Throwable cause, int statusCode) {
+    public ErrorResponse(String message, Throwable cause, int statusCode) {
         this.message = message;
         this.cause = cause;
         this.statusCode = statusCode;

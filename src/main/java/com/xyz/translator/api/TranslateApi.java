@@ -9,11 +9,14 @@ import com.xyz.translator.services.TranslateMapper;
 import com.xyz.translator.services.TranslateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @CrossOrigin("*")
 @RestController
@@ -38,9 +41,15 @@ public class TranslateApi {
         return translateMapper.mapTranslateResponse(translateRequestInput);
     }
 
-    @ExceptionHandler(ServiceResponseException.class)
-    public ResponseEntity<ErrorResponse> handleException(final ServiceResponseException sre) {
-        final ErrorResponse errorResponse = new ErrorResponse(sre);
+    @ExceptionHandler({ServiceResponseException.class, IllegalArgumentException.class})
+    public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+        ErrorResponse errorResponse;
+
+        if (ex instanceof ServiceResponseException) {
+            errorResponse = new ErrorResponse((ServiceResponseException) ex);
+        }
+        else errorResponse = new ErrorResponse(ex.getMessage(), ex.getCause(), HttpStatus.BAD_REQUEST.value());
+
         return ResponseEntity.status(errorResponse.getStatusCode()).body(errorResponse);
     }
 }
