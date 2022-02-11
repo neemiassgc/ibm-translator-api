@@ -1,11 +1,15 @@
 package com.xyz.translator.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ibm.cloud.sdk.core.service.exception.BadRequestException;
 import com.xyz.translator.dto.LanguageOptionOutput;
 import com.xyz.translator.dto.TranslateRequestInput;
 import com.xyz.translator.dto.TranslateResponseOutput;
 import com.xyz.translator.services.TranslateMapper;
 import com.xyz.translator.services.TranslateService;
+import okhttp3.Protocol;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -77,5 +81,31 @@ public class TranslateApiMvcTest {
 
         verify(this.translateMapperMock, times(1)).mapTranslateResponse(any(TranslateRequestInput.class));
         verify(this.translateMapperMock, only()).mapTranslateResponse(any(TranslateRequestInput.class));
+    }
+
+    @Test
+    void shouldReturn400WhenTranslatingWithNullTargetLanguage() throws Exception {
+        final TranslateRequestInput input = new TranslateRequestInput("Hello", "en", null);
+        final Response httpResponse = new Response.Builder()
+            .code(400)
+            .body(ResponseBody.create(
+                okhttp3.MediaType.parse("application/json"),
+                "The parameter 'target' should not be empty")
+            )
+            .message("")
+            .protocol(Protocol.HTTP_1_1)
+            .request(new okhttp3.Request.Builder().url("http://localhost/translate").build())
+            .build();
+
+        given(this.translateMapperMock.mapTranslateResponse(any(TranslateRequestInput.class)))
+            .willThrow(new BadRequestException(httpResponse));
+
+        mockMvc.perform(post("/translate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(input))
+        )
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.message").value("The parameter 'target' should not be empty"));
     }
 }
