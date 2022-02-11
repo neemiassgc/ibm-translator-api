@@ -134,4 +134,30 @@ public class TranslateApiMvcTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.message").value("The parameter 'target' should not be empty"));
     }
+
+    @Test
+    void shouldReturn400WhenTranslatingWithEmptyText() throws Exception {
+        final TranslateRequestInput input = new TranslateRequestInput("", "en", "fr");
+        final Response httpResponse = new Response.Builder()
+            .code(400)
+            .body(ResponseBody.create(
+                okhttp3.MediaType.parse("application/json"),
+                "Unable to validate payload size, the 'text' is empty.")
+            )
+            .message("")
+            .protocol(Protocol.HTTP_1_1)
+            .request(new okhttp3.Request.Builder().url("http://localhost/translate").build())
+            .build();
+
+        given(this.translateMapperMock.mapTranslateResponse(any(TranslateRequestInput.class)))
+            .willThrow(new BadRequestException(httpResponse));
+
+        mockMvc.perform(post("/translate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(input))
+        )
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.message").value("Unable to validate payload size, the 'text' is empty."));
+    }
 }
