@@ -1,8 +1,10 @@
 package com.xyz.translator.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ibm.cloud.sdk.core.service.exception.BadRequestException;
 import com.xyz.translator.dto.TranslateRequestInput;
 import com.xyz.translator.dto.TranslateResponseOutput;
+import okhttp3.Response;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -53,5 +55,18 @@ public class TranslateApiIT {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.translatedText").value("Bonjour"));
+    }
+
+    @Test
+    void shouldReturn400WhenTranslatingWithNullTargetLanguage() throws Exception {
+        final TranslateRequestInput input = new TranslateRequestInput("Hello", "en", null);
+
+        mockMvc.perform(post("/translate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(input))
+        )
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message").value("The parameter 'target' should not be empty"));
     }
 }
