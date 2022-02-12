@@ -1,6 +1,8 @@
 package com.xyz.translator.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xyz.translator.dto.TranslateRequestInput;
+import com.xyz.translator.dto.TranslateResponseOutput;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,7 +12,11 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -34,5 +40,18 @@ public class TranslateApiIT {
             .andExpect(jsonPath("$[9].languageName").value("German"))
             .andExpect(jsonPath("$[9].nativeLanguageName").value("Deutsch"))
             .andExpect(jsonPath("$[9].language").value("de")).andReturn().getResponse();
+    }
+
+    @Test
+    void shouldTranslateSuccessfullyWithStatus200() throws Exception {
+        final TranslateRequestInput input = new TranslateRequestInput("Hello", "en", "fr");
+
+        mockMvc.perform(post("/translate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(input))
+        )
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.translatedText").value("Bonjour"));
     }
 }
