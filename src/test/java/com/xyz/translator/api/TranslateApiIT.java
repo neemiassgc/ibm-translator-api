@@ -82,4 +82,17 @@ public class TranslateApiIT {
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.message").value("The parameter 'target' should not be empty"));
     }
+
+    @Test
+    void shouldReturn400WhenTranslatingWithEmptyText() throws Exception {
+        final TranslateRequestInput input = new TranslateRequestInput("", "en", "fr");
+
+        mockMvc.perform(post("/translate")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(input))
+        )
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.message").value("Unable to validate payload size, the 'text' is empty."));
+    }
 }
