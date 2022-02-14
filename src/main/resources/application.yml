@@ -1,2 +1,9 @@
 server:
   port: ${PORT:5000}
+
+logging:
+  level:
+    root: warn
+    org:
+      springframework:
+        web: trace
